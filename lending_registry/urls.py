@@ -1,0 +1,55 @@
+from django.urls import path
+from lending_registry import views
+
+urlpatterns = [
+    path(
+        "create/",
+        views.CreateLendingRegistryView.as_view(),
+        name="create",
+    ),
+    path(
+        "active/",
+        views.ListActiveLendingRegistryView.as_view(),
+        name="active",
+    ),
+    path(
+        "cleared/",
+        views.ListClearedLendingRegistryView.as_view(),
+        name="cleared",
+    ),
+    path(
+        "initiate_request_pending/",
+        views.ListInitiateRequestPendingLendingRegistryView.as_view(),
+        name="initiate_request_pending",
+    ),
+    path(
+        "clear_request_pending/",
+        views.ListClearRequestPendingLendingRegistryView.as_view(),
+        name="clear_request_pending",
+    ),
+    path(
+        "accept_initiate_request/<int:pk>/",
+        views.accept_initiate_request_view,
+        name="accept_initiate_request",
+    ),
+    path(
+        "reject_initiate_request/<int:pk>/",
+        views.reject_initiate_request_view,
+        name="reject_initiate_request",
+    ),
+    path(
+        "accept_clear_request/<int:pk>/",
+        views.accept_clear_request_view,
+        name="accept_clear_request",
+    ),
+    path(
+        "reject_clear_request/<int:pk>/",
+        views.reject_clear_request_view,
+        name="reject_clear_request",
+    ),
+    path(
+        "initiate_clear_request/<int:pk>/",
+        views.initiate_clear_request_view,
+        name="initiate_clear_request",
+    ),
+]
