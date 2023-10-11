@@ -2,9 +2,11 @@ from django.shortcuts import render
 from rest_framework import generics, authentication, permissions
 from django.contrib.auth import get_user_model
 from lending_registry.serializers import (
-    LendingRegistrySerializer,
+    ActiveLendingRegistrySerializer,
+    ClearedLendingRegistrySerializer,
     LendingRegistryCreateSerializer,
     AcceptLendingRegistrySerializer,
+    ClearRequestPendingLendingRegistrySerializer,
 )
 from lending_registry.models import LendingRegistry
 from django.db.models import Q
@@ -14,23 +16,19 @@ from rest_framework.decorators import (
     permission_classes,
 )
 from rest_framework.response import Response
+from drf_spectacular.utils import extend_schema
 
-# Create your views here.
 
 # CreateView for lending registry of the authenticated user
-
-
 class CreateLendingRegistryView(generics.CreateAPIView):
-    """List and create lending registry"""
+    """
+    Create a new LendingRegistry
+    """
 
     authentication_classes = (authentication.TokenAuthentication,)
     permission_classes = (permissions.IsAuthenticated,)
 
     serializer_class = LendingRegistryCreateSerializer
-
-    # def get_queryset(self):
-    #     user = self.request.user
-    #     return LendingRegistry.objects.filter(lender=user)
 
     def perform_create(self, serializer):
         """Create a new lending registry"""
@@ -38,15 +36,15 @@ class CreateLendingRegistryView(generics.CreateAPIView):
 
 
 # ListView for lending registry of active records of the authenticated user
-
-
 class ListActiveLendingRegistryView(generics.ListAPIView):
-    """List and create lending registry"""
+    """
+    List all the active LendingRegistry of the authenticated user.
+    """
 
     authentication_classes = (authentication.TokenAuthentication,)
     permission_classes = (permissions.IsAuthenticated,)
 
-    serializer_class = LendingRegistrySerializer
+    serializer_class = ActiveLendingRegistrySerializer
 
     def get_queryset(self):
         user = self.request.user
@@ -55,13 +53,16 @@ class ListActiveLendingRegistryView(generics.ListAPIView):
         )
 
 
+# ListView for LendingRegistry of cleared records of the authenticated user.
 class ListClearedLendingRegistryView(generics.ListAPIView):
-    """List and create lending registry"""
+    """
+    List all the cleared LendingRegistry of the authenticated user.
+    """
 
     authentication_classes = (authentication.TokenAuthentication,)
     permission_classes = (permissions.IsAuthenticated,)
 
-    serializer_class = LendingRegistrySerializer
+    serializer_class = ClearedLendingRegistrySerializer
 
     def get_queryset(self):
         user = self.request.user
@@ -70,11 +71,11 @@ class ListClearedLendingRegistryView(generics.ListAPIView):
         )
 
 
-# ListView for lending registry of records with initiate request pending
-
-
 class ListInitiateRequestPendingLendingRegistryView(generics.ListAPIView):
-    """List and create lending registry"""
+    """
+    ListView for lending registry of records with initiate request pending.
+    Also gives links to accept or reject initiate request.
+    """
 
     authentication_classes = (authentication.TokenAuthentication,)
     permission_classes = (permissions.IsAuthenticated,)
@@ -90,15 +91,16 @@ class ListInitiateRequestPendingLendingRegistryView(generics.ListAPIView):
 
 
 # ListView for lending registry of records with clear request pending
-
-
 class ListClearRequestPendingLendingRegistryView(generics.ListAPIView):
-    """List and create lending registry"""
+    """
+    ListView for lending registry of records with clear request pending.
+    Also gives links to accept or reject clear request.
+    """
 
     authentication_classes = (authentication.TokenAuthentication,)
     permission_classes = (permissions.IsAuthenticated,)
 
-    serializer_class = LendingRegistrySerializer
+    serializer_class = ClearRequestPendingLendingRegistrySerializer
 
     def get_queryset(self):
         user = self.request.user
@@ -111,10 +113,19 @@ class ListClearRequestPendingLendingRegistryView(generics.ListAPIView):
 # View to accept pending initiate request
 
 
+@extend_schema(
+    request=None,
+    responses={
+        "200": AcceptLendingRegistrySerializer,
+    },
+)
 @api_view(["GET"])
 @authentication_classes([authentication.TokenAuthentication])
 @permission_classes([permissions.IsAuthenticated])
 def accept_initiate_request_view(request, pk):
+    """
+    Redirected endpoint. Do not use manually.
+    """
     try:
         lending_registry = LendingRegistry.objects.get(
             pk=pk, status=LendingRegistry.INITIATE_REQUEST_PENDING
@@ -133,7 +144,7 @@ def accept_initiate_request_view(request, pk):
     ) or (lending_registry.initiated_by == request.user):
         return Response({"error": "Not allowed."}, status=403)
 
-    serializer = LendingRegistrySerializer(
+    serializer = ActiveLendingRegistrySerializer(
         lending_registry, data={"status": LendingRegistry.ACTIVE}, partial=True
     )
     if serializer.is_valid():
@@ -147,10 +158,16 @@ def accept_initiate_request_view(request, pk):
 # On rejecting, the lending registry should be deleted.
 
 
+@extend_schema(
+    request=None, responses={"200": {"success": "Lending registry deleted."}}
+)
 @api_view(["GET"])
 @authentication_classes([authentication.TokenAuthentication])
 @permission_classes([permissions.IsAuthenticated])
 def reject_initiate_request_view(request, pk):
+    """
+    Redirected endpoint. Do not use manually.
+    """
     try:
         lending_registry = LendingRegistry.objects.get(
             pk=pk, status=LendingRegistry.INITIATE_REQUEST_PENDING
@@ -177,10 +194,19 @@ def reject_initiate_request_view(request, pk):
 # On accepting, the lending registry status should be changed to CLEARED.
 
 
+@extend_schema(
+    request=None,
+    responses={
+        "200": AcceptLendingRegistrySerializer,
+    },
+)
 @api_view(["GET"])
 @authentication_classes([authentication.TokenAuthentication])
 @permission_classes([permissions.IsAuthenticated])
 def accept_clear_request_view(request, pk):
+    """
+    Redirected endpoint. Do not use manually.
+    """
     try:
         lending_registry = LendingRegistry.objects.get(
             pk=pk, status=LendingRegistry.CLEAR_REQUEST_PENDING
@@ -199,7 +225,7 @@ def accept_clear_request_view(request, pk):
     ) or (lending_registry.cleared_by == request.user):
         return Response({"error": "Not allowed."}, status=403)
 
-    serializer = LendingRegistrySerializer(
+    serializer = ActiveLendingRegistrySerializer(
         lending_registry, data={"status": LendingRegistry.CLEARED}, partial=True
     )
     if serializer.is_valid():
@@ -213,10 +239,19 @@ def accept_clear_request_view(request, pk):
 # On rejecting, the lending registry status should be changed to ACTIVE.
 
 
+@extend_schema(
+    request=None,
+    responses={
+        "200": AcceptLendingRegistrySerializer,
+    },
+)
 @api_view(["GET"])
 @authentication_classes([authentication.TokenAuthentication])
 @permission_classes([permissions.IsAuthenticated])
 def reject_clear_request_view(request, pk):
+    """
+    Redirected endpoint. Do not use manually.
+    """
     try:
         lending_registry = LendingRegistry.objects.get(
             pk=pk, status=LendingRegistry.CLEAR_REQUEST_PENDING
@@ -235,7 +270,7 @@ def reject_clear_request_view(request, pk):
     ) or (lending_registry.cleared_by == request.user):
         return Response({"error": "Not allowed."}, status=403)
 
-    serializer = LendingRegistrySerializer(
+    serializer = ActiveLendingRegistrySerializer(
         lending_registry, data={"status": LendingRegistry.ACTIVE}, partial=True
     )
     if serializer.is_valid():
@@ -250,10 +285,19 @@ def reject_clear_request_view(request, pk):
 # The cleared_by field should be set to whoever initiated the clear request.
 
 
+@extend_schema(
+    request=None,
+    responses={
+        "200": AcceptLendingRegistrySerializer,
+    },
+)
 @api_view(["GET"])
 @authentication_classes([authentication.TokenAuthentication])
 @permission_classes([permissions.IsAuthenticated])
 def initiate_clear_request_view(request, pk):
+    """
+    Redirected endpoint. Do not use manually.
+    """
     try:
         lending_registry = LendingRegistry.objects.get(
             pk=pk, status=LendingRegistry.ACTIVE
@@ -270,7 +314,7 @@ def initiate_clear_request_view(request, pk):
     ):
         return Response({"error": "Not allowed."}, status=403)
 
-    serializer = LendingRegistrySerializer(
+    serializer = ActiveLendingRegistrySerializer(
         lending_registry,
         data={
             "status": LendingRegistry.CLEAR_REQUEST_PENDING,
