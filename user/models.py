@@ -2,9 +2,9 @@
 User Database Model
 """
 
-from dotenv import load_dotenv
+# from dotenv import load_dotenv
 
-load_dotenv()
+# load_dotenv()
 
 from django.db import models
 from django.contrib.auth.models import (
@@ -15,7 +15,7 @@ from django.contrib.auth.models import (
 
 from decimal import Decimal
 
-from django.core.files.uploadedfile import InMemoryUploadedFile
+# from django.core.files.uploadedfile import InMemoryUploadedFile
 from django.db import models
 from io import BytesIO
 from PIL import Image
@@ -23,9 +23,10 @@ import os
 
 from supabase import create_client, Client
 from django.core.files.base import ContentFile
+from django.conf import settings
 
-url: str = os.environ.get("SUPABASE_URL")
-key: str = os.environ.get("SUPABASE_KEY")
+url: str = settings.SUPABASE_URL
+key: str = settings.SUPABASE_KEY
 supabase: Client = create_client(url, key)
 bucket_name: str = "profile_pic"
 

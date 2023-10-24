@@ -19,7 +19,7 @@ import os
 
 SUPABASE_URL = os.environ.get("SUPABASE_URL")
 SENDINBLUE_API_KEY = os.environ.get("SENDINBLUE_API_KEY")
-# SUPABASE_KEY = os.environ.get("SUPABASE_KEY")
+SUPABASE_KEY = os.environ.get("SUPABASE_KEY")
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -53,6 +53,7 @@ INSTALLED_APPS = [
     "drf_spectacular",
     "transaction",
     "lending_registry",
+    "community_post",
 ]
 
 MIDDLEWARE = [
@@ -89,10 +90,21 @@ WSGI_APPLICATION = "savio_backend.wsgi.application"
 # Database
 # https://docs.djangoproject.com/en/4.2/ref/settings/#databases
 
+# DATABASES = {
+#     "default": {
+#         "ENGINE": "django.db.backends.sqlite3",
+#         "NAME": BASE_DIR / "db.sqlite3",
+#     }
+# }
+
 DATABASES = {
     "default": {
-        "ENGINE": "django.db.backends.sqlite3",
-        "NAME": BASE_DIR / "db.sqlite3",
+        "ENGINE": "django.db.backends.postgresql",
+        "NAME": "postgres",
+        "USER": "postgres",
+        "PASSWORD": "password",
+        "HOST": "localhost",
+        "PORT": "5432",
     }
 }
 

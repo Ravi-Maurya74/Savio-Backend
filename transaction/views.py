@@ -1,4 +1,3 @@
-from django.shortcuts import render
 from rest_framework import generics, authentication, permissions
 from django.contrib.auth import get_user_model
 from transaction.serializers import TransactionListSerializer, TransactionDetailSerializer

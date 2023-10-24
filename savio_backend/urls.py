@@ -32,6 +32,7 @@ urlpatterns = [
     path("category/", include("category.urls")),
     path("transaction/", include("transaction.urls")),
     path("lending_registry/", include("lending_registry.urls")),
+    path("community_post/", include("community_post.urls")),
 ]
 
 urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
