@@ -32,10 +32,24 @@ class TransactionListSerializer(serializers.ModelSerializer):
 class TransactionDetailSerializer(serializers.ModelSerializer):
     """Serializer for the transaction object"""
 
+    category = CategorySerializer(read_only=True)
+
     class Meta:
         model = Transaction
         fields = ("id", "date", "amount", "title", "category")
         extra_kwargs = {"user": {"read_only": True}}
+
+    def create(self, validated_data):
+        """Create a new transaction"""
+        return Transaction.objects.create(**validated_data)
+    
+class TransactionCreateSerializer(serializers.ModelSerializer):
+    """Serializer for the transaction object"""
+
+
+    class Meta:
+        model = Transaction
+        fields = ("date", "amount", "title", "category")
 
     def create(self, validated_data):
         """Create a new transaction"""

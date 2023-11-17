@@ -8,4 +8,14 @@ urlpatterns = [
         views.RetrieveUpdateDestroyTransactionView.as_view(),
         name="transaction-detail",
     ),
+    path(
+        "<int:year>/<int:month>/",
+        views.ListTransactionByMonthView.as_view(),
+        name="transactions-by-month",
+    ),
+    path(
+        "daily/<int:year>/<int:month>/",
+        views.DailyExpenditureView.as_view(),
+        name="daily-expenditure",
+    ),
 ]

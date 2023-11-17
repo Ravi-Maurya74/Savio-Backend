@@ -75,6 +75,7 @@ class User(AbstractBaseUser, PermissionsMixin):
     USERNAME_FIELD = "email"
 
     def save(self, *args, **kwargs):
+        old_profile_pic = None
         if self.pk:
             # Get the previous profile picture
             old_user = User.objects.get(pk=self.pk)
@@ -86,7 +87,7 @@ class User(AbstractBaseUser, PermissionsMixin):
                 file_name = os.path.basename(old_profile_pic.name)
                 response = supabase.storage.from_(bucket_name).remove(file_name)
 
-        if self.profile_pic:
+        if self.profile_pic and (not self.pk or self.profile_pic != old_profile_pic):
             # Open the uploaded image with Pillow
             img = Image.open(self.profile_pic)
 

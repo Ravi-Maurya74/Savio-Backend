@@ -38,6 +38,7 @@ class RetrieveUpdateDestroyUserView(generics.RetrieveUpdateDestroyAPIView):
     def get_object(self):
         user = self.request.user
         return user
+        
 
 
 class CreateTokenView(ObtainAuthToken):

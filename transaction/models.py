@@ -16,5 +16,8 @@ class Transaction(models.Model):
     category = models.ForeignKey("category.Category", on_delete=models.CASCADE)
     user = models.ForeignKey("user.User", on_delete=models.CASCADE)
 
+    class Meta:
+        ordering = ["-date"]
+
     def __str__(self):
         return self.title
