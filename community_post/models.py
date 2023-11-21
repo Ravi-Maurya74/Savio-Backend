@@ -41,13 +41,14 @@ class CommunityPost(models.Model):
         return upvotes - downvotes
 
     def save(self, *args, **kwargs):
+        old_image = None
         if self.pk:
             old_image = CommunityPost.objects.get(pk=self.pk).image
             if old_image and old_image != self.image:
                 file_name = os.path.basename(old_image.name)
                 response = supabase.storage.from_(bucket_name).remove(file_name)
 
-        if self.image:
+        if self.image and (not self.pk or self.image != old_image):
             # Open the uploaded image with Pillow
             img = Image.open(self.image)
 
@@ -139,7 +140,7 @@ class Comment(models.Model):
     depth = models.PositiveIntegerField(default=0)
 
     def __str__(self):
-        return f"{self.author} commented on {self.post}"
+        return f"{self.author} commented {self.content[:50]} on {self.post}"
 
     def upvotes(self):
         return self.votes.filter(vote=CommentVote.UPVOTE).count() + sum(

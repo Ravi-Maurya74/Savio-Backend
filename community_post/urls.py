@@ -8,4 +8,7 @@ urlpatterns = [
         views.RetrieveUpdateDestroyCommunityPostView.as_view(),
         name="community-post-detail",
     ),
+    path("<int:pk>/bookmark/", views.BookmarkView.as_view(), name="bookmark"),
+    path("<int:pk>/vote/", views.PostVoteView.as_view(), name="vote"),
+    path("comments/", views.CommentListView.as_view(), name="list-comment"),
 ]

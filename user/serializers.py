@@ -14,7 +14,7 @@ import requests
 from django.contrib.auth.tokens import PasswordResetTokenGenerator
 
 
-class UserSerialzer(serializers.ModelSerializer):
+class UserSerializer(serializers.ModelSerializer):
     """Serializer for the user object"""
 
     class Meta:

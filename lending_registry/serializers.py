@@ -1,6 +1,6 @@
 from rest_framework import serializers
 from lending_registry.models import LendingRegistry
-from user.serializers import UserSerialzer as UserSerializer
+from user.serializers import UserSerializer as UserSerializer
 from user.models import User
 
 

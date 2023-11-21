@@ -2,7 +2,7 @@ from rest_framework import generics, authentication, permissions
 from rest_framework.authtoken.views import ObtainAuthToken
 from rest_framework.settings import api_settings
 from .serializers import (
-    UserSerialzer,
+    UserSerializer,
     AuthTokenSerializer,
     PasswordResetSerializer,
     PasswordResetConfirmSerializer,
@@ -24,7 +24,7 @@ from django.views import View
 class CreateUserView(generics.CreateAPIView):
     """Create a new user in the system"""
 
-    serializer_class = UserSerialzer
+    serializer_class = UserSerializer
 
 
 class RetrieveUpdateDestroyUserView(generics.RetrieveUpdateDestroyAPIView):
@@ -33,12 +33,11 @@ class RetrieveUpdateDestroyUserView(generics.RetrieveUpdateDestroyAPIView):
     authentication_classes = (authentication.TokenAuthentication,)
     permission_classes = (permissions.IsAuthenticated,)
 
-    serializer_class = UserSerialzer
+    serializer_class = UserSerializer
 
     def get_object(self):
         user = self.request.user
         return user
-        
 
 
 class CreateTokenView(ObtainAuthToken):
