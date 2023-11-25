@@ -327,3 +327,5 @@ def initiate_clear_request_view(request, pk):
         return Response(serializer.data)
     else:
         return Response(serializer.errors, status=400)
+    
+

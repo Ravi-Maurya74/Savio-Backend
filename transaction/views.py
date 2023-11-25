@@ -12,6 +12,9 @@ from django.db.models import Sum
 from django.db.models.functions import TruncDate
 from calendar import monthrange
 from datetime import date, timedelta
+import numpy as np
+from sklearn.linear_model import LinearRegression
+import calendar
 
 
 # Create your views here.
@@ -135,3 +138,94 @@ class DailyExpenditureView(generics.GenericAPIView):
         ]
 
         return Response(result)
+
+
+class SpendingByCategoryView(generics.ListAPIView):
+    authentication_classes = (authentication.TokenAuthentication,)
+    permission_classes = (permissions.IsAuthenticated,)
+
+    def get(self, request, year, month, *args, **kwargs):
+        user = request.user
+        transactions = Transaction.objects.filter(
+            user=user, date__year=year, date__month=month
+        )
+        spending_by_category = transactions.values("category__name").annotate(
+            total_spending=Sum("amount")
+        )
+        return Response(spending_by_category)
+
+
+class MonthlySpendingPredictionView(generics.GenericAPIView):
+    authentication_classes = (authentication.TokenAuthentication,)
+    permission_classes = (permissions.IsAuthenticated,)
+
+    def get(self, request, *args, **kwargs):
+        user = request.user
+        current_month = date.today().month
+        current_year = date.today().year
+        transactions = Transaction.objects.filter(
+            user=user, date__year=current_year, date__month=current_month
+        )
+        total_spending = transactions.aggregate(Sum("amount"))["amount__sum"]
+
+        # Calculate the cumulative expenditure up to each day
+        cumulative_expenditures_actual = []
+        for day in range(1, date.today().day + 1):
+            cumulative_expenditure = transactions.filter(date__day__lte=day).aggregate(
+                Sum("amount")
+            )["amount__sum"]
+            # Replace None with 0
+            if cumulative_expenditure is None:
+                cumulative_expenditure = 0
+            # Include the full date (day, month, and year)
+            full_date = date(date.today().year, date.today().month, day)
+            cumulative_expenditures_actual.append(
+                {"date": full_date, "expenditure": cumulative_expenditure}
+            )
+
+        # Train the model with the cumulative expenditure up to each day
+        days = np.array(range(1, date.today().day + 1))
+        model = LinearRegression().fit(
+            days.reshape((-1, 1)),
+            [
+                expenditure["expenditure"]
+                for expenditure in cumulative_expenditures_actual
+            ],
+        )
+
+        # Predict the cumulative expenditure for the rest of the month
+        cumulative_expenditures_predicted = [
+            {"date": date(current_year, current_month, day), "expenditure": expenditure}
+            for day, expenditure in zip(
+                range(
+                    date.today().day + 1,
+                    calendar.monthrange(current_year, current_month)[1] + 1,
+                ),
+                model.predict(
+                    np.array(
+                        range(
+                            date.today().day + 1,
+                            calendar.monthrange(current_year, current_month)[1] + 1,
+                        )
+                    ).reshape((-1, 1))
+                ),
+            )
+        ]
+
+        monthly_budget = (
+            user.total_budget
+        )  # Assuming the monthly budget is stored in a profile related to the user
+
+        return Response(
+            {
+                # 'transactions': TransactionSerializer(transactions, many=True).data,
+                "monthly_budget": monthly_budget,
+                "predicted_total_expenditure": cumulative_expenditures_predicted[-1][
+                    "expenditure"
+                ]
+                if cumulative_expenditures_predicted
+                else None,
+                "cumulative_expenditures": cumulative_expenditures_actual
+                + cumulative_expenditures_predicted,
+            }
+        )

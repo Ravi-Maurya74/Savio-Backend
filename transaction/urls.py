@@ -18,4 +18,14 @@ urlpatterns = [
         views.DailyExpenditureView.as_view(),
         name="daily-expenditure",
     ),
+    path(
+        "category/<int:year>/<int:month>/",
+        views.SpendingByCategoryView.as_view(),
+        name="category-list",
+    ),
+    path(
+        "prediction/",
+        views.MonthlySpendingPredictionView.as_view(),
+        name="prediction",
+    ),
 ]

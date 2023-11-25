@@ -143,22 +143,14 @@ class Comment(models.Model):
         return f"{self.author} commented {self.content[:50]} on {self.post}"
 
     def upvotes(self):
-        return self.votes.filter(vote=CommentVote.UPVOTE).count() + sum(
-            reply.upvotes() for reply in self.replies.all()
-        )
+        return self.votes.filter(vote=CommentVote.UPVOTE).count()
 
     def downvotes(self):
-        return self.votes.filter(vote=CommentVote.DOWNVOTE).count() + sum(
-            reply.downvotes() for reply in self.replies.all()
-        )
+        return self.votes.filter(vote=CommentVote.DOWNVOTE).count()
 
     def score(self):
-        upvotes = self.votes.filter(vote=CommentVote.UPVOTE).count() + sum(
-            reply.upvotes() for reply in self.replies.all()
-        )
-        downvotes = self.votes.filter(vote=CommentVote.DOWNVOTE).count() + sum(
-            reply.downvotes() for reply in self.replies.all()
-        )
+        upvotes = self.votes.filter(vote=CommentVote.UPVOTE).count()
+        downvotes = self.votes.filter(vote=CommentVote.DOWNVOTE).count()
         return upvotes - downvotes
 
     def save(self, *args, **kwargs):
