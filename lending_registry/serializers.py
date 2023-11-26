@@ -19,7 +19,8 @@ class LendingRegistryCreateSerializer(serializers.ModelSerializer):
             "lender",
             "borrower",
             "amount",
-            "create_date",
+            "description",
+            # "create_date",
         )
         extra_kwargs = {"id": {"read_only": True}}
 
@@ -124,6 +125,7 @@ class AcceptLendingRegistrySerializer(serializers.ModelSerializer):
             "create_date",
             "clear_date",
             "status",
+            "description",
             "accept_url",
             "reject_url",
         )

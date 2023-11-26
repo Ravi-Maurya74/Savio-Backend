@@ -19,6 +19,11 @@ from rest_framework.response import Response
 from drf_spectacular.utils import extend_schema
 
 
+class StatusChoicesView(generics.GenericAPIView):
+    def get(self, request, *args, **kwargs):
+        return Response(dict(LendingRegistry.STATUS_CHOICES))
+
+
 # CreateView for lending registry of the authenticated user
 class CreateLendingRegistryView(generics.CreateAPIView):
     """
@@ -145,7 +150,10 @@ def accept_initiate_request_view(request, pk):
         return Response({"error": "Not allowed."}, status=403)
 
     serializer = ActiveLendingRegistrySerializer(
-        lending_registry, data={"status": LendingRegistry.ACTIVE}, partial=True
+        lending_registry,
+        data={"status": LendingRegistry.ACTIVE},
+        partial=True,
+        context={"request": request},
     )
     if serializer.is_valid():
         serializer.save()
@@ -321,11 +329,10 @@ def initiate_clear_request_view(request, pk):
             "cleared_by": request.user,
         },
         partial=True,
+        context={"request": request},
     )
     if serializer.is_valid():
         serializer.save()
         return Response(serializer.data)
     else:
         return Response(serializer.errors, status=400)
-    
-

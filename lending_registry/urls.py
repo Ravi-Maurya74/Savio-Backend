@@ -3,6 +3,11 @@ from lending_registry import views
 
 urlpatterns = [
     path(
+        "status-choices/",
+        views.StatusChoicesView.as_view(),
+        name="status-choices",
+    ),
+    path(
         "create/",
         views.CreateLendingRegistryView.as_view(),
         name="create",

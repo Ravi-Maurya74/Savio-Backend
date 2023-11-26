@@ -10,6 +10,7 @@ urlpatterns = [
         views.RetrieveUpdateDestroyUserView.as_view(),
         name="retrieve-update-destroy",
     ),
+    path("", views.ListUserView.as_view(), name="user-list"),
     path("token/", views.CreateTokenView.as_view(), name="token"),
     path("password_reset/", PasswordResetView.as_view(), name="password_reset"),
     path(

@@ -17,6 +17,8 @@ from django.http import HttpResponseBadRequest, HttpResponseRedirect
 from django.urls import reverse
 from django.shortcuts import render
 from django.views import View
+from django.db.models import Q
+from drf_spectacular.utils import extend_schema, extend_schema_view, OpenApiParameter
 
 # Create your views here.
 
@@ -110,3 +112,33 @@ class CustomPasswordResetCompleteView(PasswordResetCompleteView):
             "message"
         ] = "Your password has been successfully reset. Please login with your new password."
         return context
+
+
+# ListApiView to search users by name or email. A single string will be searched in both name and email.
+
+
+@extend_schema_view(
+    get=extend_schema(
+        parameters=[
+            OpenApiParameter(
+                name="search", description="Search user by name or email", type=str
+            ),
+        ]
+    )
+)
+class ListUserView(generics.ListAPIView):
+    """Search users by name or email. A single string will be searched in both name and email. Pass the string in search query parameter."""
+
+    authentication_classes = (authentication.TokenAuthentication,)
+    permission_classes = (permissions.IsAuthenticated,)
+
+    serializer_class = UserSerializer
+
+    def get_queryset(self):
+        queryset = get_user_model().objects.exclude(pk=self.request.user.pk)
+        search = self.request.query_params.get("search", None)
+        if search is not None:
+            queryset = queryset.filter(
+                Q(name__icontains=search) | Q(email__icontains=search)
+            )
+        return queryset
