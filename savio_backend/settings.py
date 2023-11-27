@@ -16,6 +16,7 @@ load_dotenv()
 
 from pathlib import Path
 import os
+import dj_database_url
 
 SUPABASE_URL = os.environ.get("SUPABASE_URL")
 SENDINBLUE_API_KEY = os.environ.get("SENDINBLUE_API_KEY")
@@ -29,10 +30,10 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/4.2/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = "django-insecure-wt*=qu903)^$sjq7r&9bscjmw)2n&m1qklpdv2(14m@e_#=q(l"
+SECRET_KEY = "os.environ.get(SECRET_KEY)"
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = os.environ.get("DEBUG", "False").lower() == "true"
 
 ALLOWED_HOSTS = ["*"]
 
@@ -108,6 +109,13 @@ DATABASES = {
     }
 }
 
+database_url = os.environ.get(
+    "DATABASE_URL", "postgresql://devuser:changeme@localhost:5432/postgres"
+)
+
+DATABASES["default"] = dj_database_url.parse(database_url)
+
+# postgresql://USER:PASSWORD@HOST:PORT/NAME
 
 
 # Password validation
