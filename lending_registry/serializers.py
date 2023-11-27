@@ -46,7 +46,7 @@ class ActiveLendingRegistrySerializer(serializers.ModelSerializer):
     lender = UserSerializer(read_only=True)
     borrower = UserSerializer(read_only=True)
     initiated_by = UserSerializer(read_only=True)
-    cleared_by = UserSerializer(read_only=True)
+    cleared_by = UserSerializer()
 
     # add hyperlink to initiate clearing request
 
@@ -151,6 +151,33 @@ class ClearRequestPendingLendingRegistrySerializer(serializers.ModelSerializer):
     )
     reject_clear_request_url = serializers.HyperlinkedIdentityField(
         view_name="reject_clear_request",
+        lookup_field="id",
+        lookup_url_kwarg="pk",
+    )
+
+    class Meta:
+        model = LendingRegistry
+        fields = "__all__"
+
+    extra_kwargs = {"id": {"read_only": True}}
+
+
+
+class InitiateClearRequestSerializer(serializers.ModelSerializer):
+    """
+    Serializer for viewing active Lending Registry.
+    Also contains link to initiate a clear request.
+    """
+
+    lender = UserSerializer(read_only=True)
+    borrower = UserSerializer(read_only=True)
+    initiated_by = UserSerializer(read_only=True)
+    # cleared_by = UserSerializer()
+
+    # add hyperlink to initiate clearing request
+
+    initiate_clearing_request_url = serializers.HyperlinkedIdentityField(
+        view_name="initiate_clear_request",
         lookup_field="id",
         lookup_url_kwarg="pk",
     )

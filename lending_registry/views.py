@@ -7,9 +7,10 @@ from lending_registry.serializers import (
     LendingRegistryCreateSerializer,
     AcceptLendingRegistrySerializer,
     ClearRequestPendingLendingRegistrySerializer,
+    InitiateClearRequestSerializer,
 )
 from lending_registry.models import LendingRegistry
-from django.db.models import Q
+from django.db.models import Q, Sum
 from rest_framework.decorators import (
     api_view,
     authentication_classes,
@@ -234,7 +235,10 @@ def accept_clear_request_view(request, pk):
         return Response({"error": "Not allowed."}, status=403)
 
     serializer = ActiveLendingRegistrySerializer(
-        lending_registry, data={"status": LendingRegistry.CLEARED}, partial=True
+        lending_registry,
+        data={"status": LendingRegistry.CLEARED},
+        partial=True,
+        context={"request": request},
     )
     if serializer.is_valid():
         serializer.save()
@@ -279,7 +283,10 @@ def reject_clear_request_view(request, pk):
         return Response({"error": "Not allowed."}, status=403)
 
     serializer = ActiveLendingRegistrySerializer(
-        lending_registry, data={"status": LendingRegistry.ACTIVE}, partial=True
+        lending_registry,
+        data={"status": LendingRegistry.ACTIVE},
+        partial=True,
+        context={"request": request},
     )
     if serializer.is_valid():
         serializer.save()
@@ -322,11 +329,11 @@ def initiate_clear_request_view(request, pk):
     ):
         return Response({"error": "Not allowed."}, status=403)
 
-    serializer = ActiveLendingRegistrySerializer(
+    serializer = InitiateClearRequestSerializer(
         lending_registry,
         data={
             "status": LendingRegistry.CLEAR_REQUEST_PENDING,
-            "cleared_by": request.user,
+            "cleared_by": request.user.id,
         },
         partial=True,
         context={"request": request},
@@ -336,3 +343,38 @@ def initiate_clear_request_view(request, pk):
         return Response(serializer.data)
     else:
         return Response(serializer.errors, status=400)
+
+
+class UserBalanceView(generics.GenericAPIView):
+    authentication_classes = [authentication.TokenAuthentication]
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get(self, request, format=None):
+        user = request.user
+        total_owed = (
+            LendingRegistry.objects.filter(borrower=user)
+            .exclude(
+                Q(status=LendingRegistry.CLEARED)
+                | Q(status=LendingRegistry.INITIATE_REQUEST_PENDING)
+            )
+            .aggregate(Sum("amount"))["amount__sum"]
+            or 0
+        )
+        total_lent = (
+            LendingRegistry.objects.filter(lender=user)
+            .exclude(
+                Q(status=LendingRegistry.CLEARED)
+                | Q(status=LendingRegistry.INITIATE_REQUEST_PENDING)
+            )
+            .aggregate(Sum("amount"))["amount__sum"]
+            or 0
+        )
+        net = total_lent - total_owed
+
+        return Response(
+            {
+                "total_owed": total_owed,
+                "total_lent": total_lent,
+                "net": net,
+            }
+        )

@@ -34,8 +34,8 @@ class LendingRegistry(models.Model):
     )
     amount = models.DecimalField(max_digits=10, decimal_places=2)
     create_date = models.DateField(auto_now_add=True)
-    clear_date = models.DateField(null=True, blank=True)
+    clear_date = models.DateField(null=True, blank=True, auto_now=True)
     status = models.CharField(
         max_length=30, choices=STATUS_CHOICES, default=INITIATE_REQUEST_PENDING
     )
-    description = models.CharField(max_length=250,null=True, blank=True)
+    description = models.CharField(max_length=250, null=True, blank=True)

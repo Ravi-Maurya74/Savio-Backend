@@ -57,4 +57,5 @@ urlpatterns = [
         views.initiate_clear_request_view,
         name="initiate_clear_request",
     ),
+    path("balance/", views.UserBalanceView.as_view(), name="balance"),
 ]
