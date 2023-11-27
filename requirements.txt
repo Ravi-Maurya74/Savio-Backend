@@ -56,7 +56,7 @@ sniffio
 sqlparse
 storage3
 StrEnum
-supabase
+supabase==1.2.0
 supabase-py
 supafunc
 threadpoolctl
