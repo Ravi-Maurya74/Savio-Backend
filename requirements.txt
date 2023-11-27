@@ -10,7 +10,7 @@ click==8.1.7
 dataclasses==0.6
 deprecation==2.1.0
 dj-database-url==2.1.0
-Django==4.2.5
+Django==3.2.23
 djangorestframework==3.14.0
 drf-spectacular==0.26.5
 exceptiongroup==1.1.3
