@@ -10,9 +10,9 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/4.2/ref/settings/
 """
 
-# from dotenv import load_dotenv
+from dotenv import load_dotenv
 
-# load_dotenv()
+load_dotenv()
 
 from pathlib import Path
 import os
@@ -35,9 +35,11 @@ SECRET_KEY = os.environ.get("SECRET_KEY")
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = os.environ.get("DEBUG", "False").lower() == "true"
 
-ALLOWED_HOSTS = os.environ.get(
-    "ALLOWED_HOSTS",
-).split(" ")
+# ALLOWED_HOSTS = os.environ.get(
+#     "ALLOWED_HOSTS",
+# ).split(" ")
+
+ALLOWED_HOSTS = ["*"]
 
 
 # Application definition

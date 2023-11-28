@@ -2,9 +2,9 @@
 User Database Model
 """
 
-# from dotenv import load_dotenv
+from dotenv import load_dotenv
 
-# load_dotenv()
+load_dotenv()
 
 from django.db import models
 from django.contrib.auth.models import (
