@@ -1,6 +1,11 @@
 {
     "builds": [
         {
+            "src": "build_files.sh",
+            "use": "@vercel/static-build",
+            "config": { "distDir": "staticfiles" }
+        },
+        {
             "src": "savio_backend/wsgi.py",
             "use": "@vercel/python",
             "config": { "maxLambdaSize": "15mb","runtime": "python3.9" }
