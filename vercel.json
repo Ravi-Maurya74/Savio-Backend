@@ -13,6 +13,5 @@
     ],
     "routes": [
         { "src": "/(.*)", "dest": "savio_backend/wsgi.py" }
-    ],
-    "installCommand": "pip install -r requirements.txt --use-deprecated=legacy-resolver"
+    ]
 }
