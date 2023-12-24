@@ -11,3 +11,4 @@ scikit-learn
 supabase
 websockets
 gunicorn
+dj_database_url
