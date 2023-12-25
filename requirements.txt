@@ -13,3 +13,4 @@ websockets
 requests
 dj_database_url
 gunicorn
+whitenoise
